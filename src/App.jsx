@@ -18,42 +18,35 @@ function App() {
     }
   };
 
-  const handleGenerate = async () => {
+  const downloadPdf = async (generator, downloadName) => {
     if (!file) return;
 
     setLoading(true);
+    setError('');
 
     try {
-      const reader = new FileReader();
+      const arrayBuffer = await file.arrayBuffer();
+      const pdfBytes = await generator(arrayBuffer);
 
-      reader.onload = async (e) => {
-        try {
-          const arrayBuffer = e.target.result;
+      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
 
-          const pdfBytes = await addLetterheadToInvoice(arrayBuffer);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = downloadName;
+      link.click();
 
-          const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-          const url = window.URL.createObjectURL(blob);
-
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = `Final_Invoice.pdf`;
-          link.click();
-
-          window.URL.revokeObjectURL(url);
-        } catch (err) {
-          console.error(err);
-          setError('Error processing PDF.');
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      reader.readAsArrayBuffer(file);
+      window.URL.revokeObjectURL(url);
     } catch (err) {
-      setError('Error reading file.');
+      console.error(err);
+      setError('Error processing PDF.');
+    } finally {
       setLoading(false);
     }
+  };
+
+  const handleGenerate = async () => {
+    await downloadPdf(addLetterheadToInvoice, 'Final_Invoice.pdf');
   };
 
   return (
@@ -89,9 +82,14 @@ function App() {
 
       {error && <p style={{ color: 'red' }}>{error}</p>}
 
-      <button onClick={handleGenerate} disabled={!file || loading}>
-        {loading ? 'Processing...' : 'Generate Invoice'}
-      </button>
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', flexWrap: 'wrap' }}>
+        <button onClick={handleGenerate} disabled={!file || loading} className="btn">
+          {loading ? 'Processing...' : 'Generate Invoice'}
+        </button>
+        <button onClick={() => window.location.href = '/label'} className="btn">
+          Print Label
+        </button>
+      </div>
     </div>
   );
 }
