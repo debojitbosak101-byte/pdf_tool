@@ -91,10 +91,10 @@ export async function generateLabelPDF(formData, randomQuote) {
     color: white
   });
 
-  page.drawText('SHIPPING LABEL', {
-    x: 25,
+  page.drawText('SHIPPING DETAILS', {
+    x: A5_WIDTH / 2 - 80,
     y: A5_HEIGHT - 45,
-    size: 16,
+    size: 16 * 1.5,
     color: black,
     font: fontBold
   });
@@ -110,7 +110,7 @@ export async function generateLabelPDF(formData, randomQuote) {
   page.drawText('SHIP TO:', {
     x: 25,
     y: A5_HEIGHT - 75,
-    size: 10,
+    size: 10 * 1.5,
     color: black,
     font: fontBold
   });
@@ -119,7 +119,7 @@ export async function generateLabelPDF(formData, randomQuote) {
     .split('\n')
     .filter(Boolean)
     .flatMap((line, index) =>
-      wrapText(line, index === 0 ? fontBold : fontRegular, index === 0 ? 12 : 10, A5_WIDTH - 50)
+      wrapText(line, index === 0 ? fontBold : fontRegular, index === 0 ? 12 * 1.5 : 10 * 1.5, A5_WIDTH - 50)
     );
 
   let yPos = A5_HEIGHT - 90;
@@ -128,11 +128,11 @@ export async function generateLabelPDF(formData, randomQuote) {
     page.drawText(line, {
       x: firstLine ? 30 : 35,
       y: yPos,
-      size: firstLine ? 12 : 10,
+      size: firstLine ? 12 * 1.5 : 10 * 1.5,
       color: black,
       font: firstLine ? fontBold : fontRegular
     });
-    yPos -= firstLine ? 14 : 12;
+    yPos -= firstLine ? 14 * 1.5 : 12 * 1.5;
     firstLine = false;
   }
 
@@ -149,7 +149,7 @@ export async function generateLabelPDF(formData, randomQuote) {
   page.drawText('FROM:', {
     x: 25,
     y: toSectionBottom - 20,
-    size: 10,
+    size: 10 * 1.5,
     color: black,
     font: fontBold
   });
@@ -157,25 +157,25 @@ export async function generateLabelPDF(formData, randomQuote) {
   const fromLines = formData.fromAddress
     .split('\n')
     .filter(Boolean)
-    .flatMap(line => wrapText(line, fontRegular, 10, A5_WIDTH - 230));
+    .flatMap(line => wrapText(line, fontRegular, 10 * 1.5, A5_WIDTH - 230));
 
   yPos = toSectionBottom - 35;
   for (const line of fromLines.slice(0, 6)) {
     page.drawText(line, {
       x: 30,
       y: yPos,
-      size: 10,
+      size: 10 * 1.5,
       color: black,
       font: fontRegular
     });
-    yPos -= 12;
+    yPos -= 12 * 1.5;
   }
 
-  // Docket No and Date under FROM address
-  page.drawText(`Docket No: ${formData.documentNo}`, {
+  // Document Number and Date under FROM address
+  page.drawText(`Document Number: ${formData.documentNo}`, {
     x: 30,
     y: yPos - 10,
-    size: 9,
+    size: 9 * 1.5,
     color: black,
     font: fontBold
   });
@@ -183,7 +183,7 @@ export async function generateLabelPDF(formData, randomQuote) {
   page.drawText(`Date: ${formData.date}`, {
     x: 30,
     y: yPos - 25,
-    size: 9,
+    size: 9 * 1.5,
     color: black,
     font: fontRegular
   });
@@ -192,7 +192,7 @@ export async function generateLabelPDF(formData, randomQuote) {
     page.drawText(`WT: ${formData.weight}`, {
       x: 30,
       y: yPos - 40,
-      size: 9,
+      size: 9 * 1.5,
       color: black,
       font: fontRegular
     });
@@ -211,17 +211,17 @@ export async function generateLabelPDF(formData, randomQuote) {
     page.drawText(line, {
       x: 25,
       y: yPos,
-      size: 8,
+      size: 8 * 1.5,
       color: darkGray,
       font: fontItalic
     });
-    yPos -= 10;
+    yPos -= 10 * 1.5;
   }
 
   page.drawText('FOLLOW US: @suvams.co', {
     x: 25,
     y: 30,
-    size: 9,
+    size: 9 * 1.5,
     color: black,
     font: fontRegular
   });
