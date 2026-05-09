@@ -205,9 +205,17 @@ export async function generateLabelPDF(formData, randomQuote) {
     color: gray
   });
 
+  page.drawText('FOLLOW US: @suvams.co', {
+    x: 25,
+    y: 55,
+    size: 9 * 1.5,
+    color: black,
+    font: fontRegular
+  });
+
   const quoteLines = randomQuote.match(/.{1,60}/g) || [randomQuote];
-  yPos = yPos - 65;
-  for (const line of quoteLines.slice(0, 4)) {
+  yPos = 40;
+  for (const line of quoteLines.slice(0, 2)) {
     page.drawText(line, {
       x: 25,
       y: yPos,
@@ -215,16 +223,8 @@ export async function generateLabelPDF(formData, randomQuote) {
       color: darkGray,
       font: fontItalic
     });
-    yPos -= 10 * 1.5;
+    yPos -= 12 * 1.5;
   }
-
-  page.drawText('FOLLOW US: @suvams.co', {
-    x: 25,
-    y: 30,
-    size: 9 * 1.5,
-    color: black,
-    font: fontRegular
-  });
 
   return await pdfDoc.save();
 }
