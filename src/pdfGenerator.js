@@ -106,76 +106,14 @@ export async function generateLabelPDF(formData, randomQuote) {
     color: black
   });
 
-  page.drawText('FROM:', {
+  // SHIP TO at the top
+  page.drawText('SHIP TO:', {
     x: 25,
     y: A5_HEIGHT - 75,
     size: 10,
     color: black,
     font: fontBold
   });
-
-  const fromLines = formData.fromAddress
-    .split('\n')
-    .filter(Boolean)
-    .flatMap(line => wrapText(line, fontRegular, 10, A5_WIDTH - 230));
-
-  let yPos = A5_HEIGHT - 105;
-  for (const line of fromLines.slice(0, 6)) {
-    page.drawText(line, {
-      x: 30,
-      y: yPos,
-      size: 10,
-      color: black,
-      font: fontRegular
-    });
-    yPos -= 12;
-  }
-
-  const fromSectionBottom = yPos - 10;
-
-  page.drawText(`Docket No: ${formData.documentNo}`, {
-    x: A5_WIDTH - 170,
-    y: A5_HEIGHT - 80,
-    size: 9,
-    color: black,
-    font: fontBold
-  });
-
-  page.drawText(`Date: ${formData.date}`, {
-    x: A5_WIDTH - 170,
-    y: A5_HEIGHT - 95,
-    size: 9,
-    color: black,
-    font: fontRegular
-  });
-
-  if (formData.weight) {
-    page.drawText(`WT: ${formData.weight}`, {
-      x: A5_WIDTH - 170,
-      y: A5_HEIGHT - 110,
-      size: 9,
-      color: black,
-      font: fontRegular
-    });
-  }
-
-  page.drawLine({
-    start: { x: 20, y: fromSectionBottom },
-    end: { x: A5_WIDTH - 20, y: fromSectionBottom },
-    thickness: 0.8,
-    color: gray
-  });
-
-  const shipToStartY = fromSectionBottom - 20;
-  page.drawText('SHIP TO:', {
-    x: 25,
-    y: shipToStartY,
-    size: 10,
-    color: black,
-    font: fontBold
-  });
-
-  yPos = shipToStartY - 15;
 
   const toLines = formData.toAddress
     .split('\n')
@@ -184,6 +122,7 @@ export async function generateLabelPDF(formData, randomQuote) {
       wrapText(line, index === 0 ? fontBold : fontRegular, index === 0 ? 12 : 10, A5_WIDTH - 50)
     );
 
+  let yPos = A5_HEIGHT - 90;
   let firstLine = true;
   for (const line of toLines.slice(0, 8)) {
     page.drawText(line, {
@@ -197,15 +136,17 @@ export async function generateLabelPDF(formData, randomQuote) {
     firstLine = false;
   }
 
-  const toSectionBottom = yPos - 10;
+  const toSectionBottom = yPos - 15;
+
   page.drawLine({
     start: { x: 20, y: toSectionBottom },
     end: { x: A5_WIDTH - 20, y: toSectionBottom },
-    thickness: 1,
-    color: black
+    thickness: 0.8,
+    color: gray
   });
 
-  page.drawText('TRACKING CODE', {
+  // FROM address after gap
+  page.drawText('FROM:', {
     x: 25,
     y: toSectionBottom - 20,
     size: 10,
@@ -213,75 +154,59 @@ export async function generateLabelPDF(formData, randomQuote) {
     font: fontBold
   });
 
-  const barcodeText = formData.documentNo;
-  page.drawText(barcodeText, {
-    x: 25,
-    y: toSectionBottom - 35,
+  const fromLines = formData.fromAddress
+    .split('\n')
+    .filter(Boolean)
+    .flatMap(line => wrapText(line, fontRegular, 10, A5_WIDTH - 230));
+
+  yPos = toSectionBottom - 35;
+  for (const line of fromLines.slice(0, 6)) {
+    page.drawText(line, {
+      x: 30,
+      y: yPos,
+      size: 10,
+      color: black,
+      font: fontRegular
+    });
+    yPos -= 12;
+  }
+
+  // Docket No and Date under FROM address
+  page.drawText(`Docket No: ${formData.documentNo}`, {
+    x: 30,
+    y: yPos - 10,
+    size: 9,
+    color: black,
+    font: fontBold
+  });
+
+  page.drawText(`Date: ${formData.date}`, {
+    x: 30,
+    y: yPos - 25,
     size: 9,
     color: black,
     font: fontRegular
   });
 
-  const barcodeStartX = 25;
-  const barcodeStartY = A5_HEIGHT - 320;
-  const stripeHeight = 38;
-  const stripeWidth = 2;
-
-  // Generate barcode pattern based on docket number
-  const docketNum = formData.documentNo.replace(/\D/g, ''); // Remove non-digits
-  const barcodePattern = [];
-
-  // Start with quiet zone (white stripes)
-  for (let i = 0; i < 3; i++) barcodePattern.push(0);
-
-  // Add start pattern
-  barcodePattern.push(1, 0, 1, 0);
-
-  // Encode each digit
-  for (const char of docketNum) {
-    const digit = parseInt(char);
-    // Simple encoding: alternate based on digit value
-    for (let j = 0; j < 4; j++) {
-      barcodePattern.push(digit % 2 === j % 2 ? 1 : 0);
-    }
-  }
-
-  // Add stop pattern
-  barcodePattern.push(1, 0, 1, 0);
-
-  // End with quiet zone
-  for (let i = 0; i < 3; i++) barcodePattern.push(0);
-
-  // Draw the barcode
-  for (let i = 0; i < Math.min(barcodePattern.length, 38); i++) {
-    const x = barcodeStartX + i * stripeWidth;
-    const isBlack = barcodePattern[i] === 1;
-    page.drawRectangle({
-      x,
-      y: barcodeStartY,
-      width: stripeWidth,
-      height: stripeHeight,
-      color: isBlack ? black : white
+  if (formData.weight) {
+    page.drawText(`WT: ${formData.weight}`, {
+      x: 30,
+      y: yPos - 40,
+      size: 9,
+      color: black,
+      font: fontRegular
     });
   }
 
-  page.drawText(`DOCKET NO: ${formData.documentNo}`, {
-    x: 25,
-    y: A5_HEIGHT - 340,
-    size: 8,
-    color: black,
-    font: fontRegular
-  });
-
   page.drawLine({
-    start: { x: 20, y: A5_HEIGHT - 350 },
-    end: { x: A5_WIDTH - 20, y: A5_HEIGHT - 350 },
+    start: { x: 20, y: yPos - 50 },
+    end: { x: A5_WIDTH - 20, y: yPos - 50 },
     thickness: 0.8,
     color: gray
   });
 
   const quoteLines = randomQuote.match(/.{1,60}/g) || [randomQuote];
-  yPos = A5_HEIGHT - 360;
+  yPos = yPos - 65;
   for (const line of quoteLines.slice(0, 4)) {
     page.drawText(line, {
       x: 25,
